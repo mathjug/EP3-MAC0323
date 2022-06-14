@@ -16,27 +16,17 @@ public class Grafo {
 
     private class NodeGrafo {
         /*
-        Classe que implementa um nó utilizado para implementar um grafo, contido no array
-        de arestas.
+        Classe auxiliar que implementa um nó utilizado como unidade básica para representar um grafo.
         */
         private int valor; // valor do vértice
         private NodeGrafo proximo;
-        private int n_adjacentes; // guarda o número de vértices adjacentes (é -1 caso seja um nó na lista dos adjacentes)
+        private int n_adjacentes; // guarda o número de vértices adjacentes (é diferente de -1 apenas se for um nó
+                                    // diretamente contido no array de nós)
 
         private NodeGrafo(int valor) {
             this.valor = valor;
             proximo = null;
             n_adjacentes = -1;
-        }
-
-        private int nAdjacentes() {
-            return n_adjacentes;
-        }
-        private NodeGrafo proximo() {
-            return proximo;
-        }
-        private int valor() {
-            return valor;
         }
 
         private void add(int v) {
@@ -49,12 +39,16 @@ public class Grafo {
     }
 
     public Grafo(String endereco) throws IOException {
+        /*
+        Construtor que gera um grafo a partir das informações de um arquivo de texto. A primeira linha
+        desse arquivo contém o número de vértices e arestas do grafo, enquanto as linhas subsequentes
+        indicam quais as arestas que compoem esse grafo.
+        */
         File arquivo = new File(endereco);
         Scanner input = new Scanner(arquivo);
         
         V = input.nextInt();
         E = input.nextInt();
-        //input.nextLine(); // apenas para pular para a próxima linha
         arestas = new NodeGrafo[V];
         for (int v = 0; v < V; v++) {
             arestas[v] = new NodeGrafo(v);
@@ -108,7 +102,11 @@ public class Grafo {
         this.arestas = arestas;
     }
 
-    public int[] encontraDistancias(int indice) { // fazer busca em largura
+    public int[] encontraDistancias(int indice) {
+        /*
+        Método que, dado o índice de um vértice do grafo, calcula a distância de cada um dos outros vértices até
+        ele, por meio de uma busca em largura.
+        */
         int[] distancias = new int[V];
         Queue<Integer> fila = new LinkedList<>();
 
@@ -121,9 +119,9 @@ public class Grafo {
             int atual = fila.remove();
             NodeGrafo aux = arestas[atual];
             if (aux != null) {
-                for (int j = 0; j < arestas[atual].nAdjacentes(); j++) { // percorrendo os adjacentes de 'atual'
-                    aux = aux.proximo();
-                    int v = aux.valor();
+                for (int j = 0; j < arestas[atual].n_adjacentes; j++) { // percorrendo os adjacentes de 'atual'
+                    aux = aux.proximo;
+                    int v = aux.valor;
                     if (distancias[v] == -1) {
                         distancias[v] = distancias[atual] + 1;
                         fila.add(v);
@@ -159,9 +157,9 @@ public class Grafo {
         marked[v] = true;
         NodeGrafo aux = arestas[v];
         if (aux != null) {
-            for (int i = 0; i < arestas[v].nAdjacentes(); i++) {
-                aux = aux.proximo();
-                int w = aux.valor();
+            for (int i = 0; i < arestas[v].n_adjacentes; i++) {
+                aux = aux.proximo;
+                int w = aux.valor;
                 if (!marked[w])
                     dfsR(w, marked);
             }
@@ -169,10 +167,13 @@ public class Grafo {
     }
 
     public static void main (String[] args) throws IOException {
-        int V = 300;
-        Grafo G = new Grafo(V, 0.01);
+        // int V = 300;
+        // Grafo G = new Grafo(V, 0.01);
+        Grafo G = new Grafo("test1.txt");
         int[] conexas = G.buscaConexas();
-        System.out.println(conexas[V]);
-        G.encontraDistancias(2);
+        System.out.println(conexas[7]);
+        int[] distancias = G.encontraDistancias(1);
+        for (int i = 0; i < 7; i++)
+            System.out.println(distancias[i]);
     }
 }
