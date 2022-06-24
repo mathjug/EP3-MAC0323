@@ -46,7 +46,7 @@ public class Grafo {
         de acordo com a opção passada como argumento para este construtor. Portanto, "option" pode obter dois
         valores:
             1 = arquivo gerador de um grafo de inteiros.
-            2 = arquivo gerador de um grafo de Strings.
+            3 = arquivo gerador de um grafo de Strings.
         O formato de cada arquivo é melhor explicado em cada um dos dois métodos auxiliares que são aqui chamados.
         */
         if (option == 1)
@@ -278,6 +278,26 @@ public class Grafo {
         }
     }
 
+    public double calculaDistanciasMedias() {
+        int somatoria = 0;
+        int contador = 0;
+        for (int i = 0; i < V; i++) {
+            int[] distancias = encontraDistancias(i);
+            for (int j = 0; j < V; j++) {
+                if (i != j && distancias[j] != -1) {
+                    somatoria += distancias[j];
+                    contador++; 
+                }
+            }
+        }
+        double media;
+        if (somatoria == 0 && contador == 0)
+            media = -1;
+        else
+            media = somatoria / contador;
+        return media;
+    }
+
     public static void main (String[] args) throws IOException {
         Scanner input_usuarios = new Scanner(System.in); 
         System.out.println("Qual o tipo de grafo a ser criado?\n (1) Grafo de inteiros (a partir de um arquivo).");
@@ -289,13 +309,14 @@ public class Grafo {
             input_usuarios.nextLine();
             String endereco = input_usuarios.nextLine();
             if (tipo == 1)
-            G = new Grafo(endereco, 1);
+                G = new Grafo(endereco, 1);
             else
-                G = new Grafo(endereco, 2);
+                G = new Grafo(endereco, 3);
         }
         else {
             System.out.print("V = ");
             int V = input_usuarios.nextInt();
+            System.out.println("ATENÇÃO: o indicador de decimal de p deve ser a VÍRGULA (0 <= p <= 1)");
             System.out.print("p = ");
             Double p = input_usuarios.nextDouble();
             G = new Grafo(V, p);
@@ -303,14 +324,30 @@ public class Grafo {
         input_usuarios.close();
 
         int[] conexas = G.buscaConexas();
-        System.out.printf("\nNúmero de componentes conexas: %d\n\n", conexas[G.V]);
-        System.out.println("-- Calcula as distâncias para o primeiro vértice adicionado --");
+        int n_componentes = conexas[G.V];
+        System.out.printf("\nNúmero de componentes conexas: %d\n", n_componentes);
+        
+        int maior_quantidade = 0;
+        int[] tamanhos_componentes = new int[n_componentes]; // guarda o tamanho de cada componente conexa
+        for (int i = 0; i < G.V; i++) {
+            tamanhos_componentes[conexas[i]]++;
+            if (tamanhos_componentes[conexas[i]] > maior_quantidade)
+                maior_quantidade = tamanhos_componentes[conexas[i]];
+        }
+        System.out.printf("Tamanho da maior componente: %d\n\n", maior_quantidade);
+        for (int i = 0; i < n_componentes; i++)
+            System.out.printf("Número de elementos da componente %d: %d\n", i, tamanhos_componentes[i]);
+        
+        System.out.println("\n-- Calcula as distâncias para o primeiro vértice adicionado --");
         int[] distancias = G.encontraDistancias(0);
         if (G.palavras != null)
             for (int i = 0; i < G.V; i++)
-                System.out.printf("%s -> %d\n", G.palavras[i], distancias[i]);
+                System.out.printf("%s: %d\n", G.palavras[i], distancias[i]);
         else
             for (int i = 0; i < G.V; i++)
-                System.out.printf("%d -> %d\n", i, distancias[i]);
+                System.out.printf("%d: %d\n", i, distancias[i]);
+        
+        System.out.printf("\nDistância média dos vértices: %f\n", G.calculaDistanciasMedias());
+        System.out.println("(uma distância de -1 significa infinito)");
     }
 }
